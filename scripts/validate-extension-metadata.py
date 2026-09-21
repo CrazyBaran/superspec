@@ -48,8 +48,16 @@ def extract_commands_block(manifest: str) -> str:
     share the same ``    - name:`` shape as commands but aren't subject to
     the ``speckit.<id>.*`` namespace rule. Slicing out just the commands
     block before scanning for names keeps them out of that check.
+
+    Blank (whitespace-only) lines between list items are part of the block;
+    the block ends at the next line indented by fewer than 4 spaces that has
+    content (e.g. ``  templates:``).
     """
-    match = re.search(r"^  commands:\n((?:^ {4,}.*\n)*)", manifest, re.MULTILINE)
+    match = re.search(
+        r"^  commands:[ \t]*\n((?:(?:^ {4,}.*|^[ \t]*)(?:\n|\Z))*)",
+        manifest,
+        re.MULTILINE,
+    )
     if not match:
         fail("extension.yml must declare provides.commands[].name entries")
     return match.group(1)
